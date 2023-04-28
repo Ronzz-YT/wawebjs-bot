@@ -1,12 +1,18 @@
-import('../settings.js');
-
 import util from 'util';
 import cp from 'child_process';
 import syntaxerror from 'syntax-error';
 import { tiktok } from '@xct007/frieren-scraper';
 import fetch from 'node-fetch';
 import { fileTypeFromBuffer } from 'file-type';
-import { ytMp4, ytMp3 } from './y2mate.js';
+import { fileURLToPath } from 'url';
+import { createRequire } from 'module'
+import path, { dirname } from 'path'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+const require = createRequire(__dirname)
+
+require(path.join(__dirname, '../settings.js'))
 
 export async function menuCommand(m, func) {
   let text = `▬▭▬▭▬▭ ✦✧✦ ▬▭▬▭▬▭
@@ -92,10 +98,11 @@ export async function tiktokMp3Command(m, value, command, func, MessageMedia) {
 export async function ytMp4Command(m, value, command, func, MessageMedia) {
   if (!value) return m.reply(`Penggunaan: *${prefix+command} https://youtu.be/cHfyes6e7HQ*`);
   if (!func.isUrl(value)) return m.reply(global.mess.error.lv);
-  ytMp4(value).then(res => {
+  fetch(`https://saipulanuar.ga/api/download/ytmp4?url=${value}`).then(res => {
+    let data = res.json()
     m.reply(global.mess.wait)
-    let video = Buffer.from(fetch(res.result).arrayBuffer())
-    m.reply(new MessageMedia((fileTypeFromBuffer(video)).mime, video.toString("base64")), false, { caption: `*⭔Title :* ${res.title}\n*⭔Channel :* ${res.channel}\n*⭔Published :* ${res.uploadDate}\n*⭔View :* ${res.views}\n*⭔Description :* ${res.desc}` });
+    let video = Buffer.from(fetch(data.result.url).arrayBuffer())
+    m.reply(new MessageMedia((fileTypeFromBuffer(video)).mime, video.toString("base64")), false, { caption: `*⭔Title :* ${data.result.title}\n*⭔Channel :* ${data.result.channel}\n*⭔Published :* ${data.result.published}\n*⭔View :* ${data.result.views}` });
   }).catch(err => {
     console.log(err)
     m.reply(global.mess.error.api)
@@ -105,10 +112,11 @@ export async function ytMp4Command(m, value, command, func, MessageMedia) {
 export async function ytMp3Command(m, value, command, func, MessageMedia) {
   if (!value) return m.reply(`Penggunaan: *${prefix+command} https://youtu.be/cHfyes6e7HQ*`);
   if (!func.isUrl(value)) return m.reply(global.mess.error.lv);
-  ytMp3(value).then(res => {
+  fetch(`https://saipulanuar.ga/api/download/ytmp3?url=${value}`).then(res => {
+    let data = res.json()
     m.reply(global.mess.wait)
-    let audio = Buffer.from(fetch(res.result).arrayBuffer())
-    m.reply(`*⭔Title :* ${res.title}\n*⭔Channel :* ${res.channel}\n*⭔Published :* ${res.uploadDate}\n*⭔View :* ${res.views}\n*⭔Description :* ${res.desc}\n\n_Sedang mengirim audio_\n_Mohon tunggu sebentar._`)
+    let audio = Buffer.from(fetch(data.result.url).arrayBuffer())
+    m.reply(`*⭔Title :* ${data.result.title}\n*⭔Channel :* ${data.result.channel}\n*⭔Published :* ${data.result.published}\n*⭔View :* ${data.result.views}\n\n_Sedang mengirim audio_\n_Mohon tunggu sebentar._`)
     m.reply(new MessageMedia((fileTypeFromBuffer(audio)).mime, audio.toString("base64")));
   }).catch(err => {
     console.log(err)
