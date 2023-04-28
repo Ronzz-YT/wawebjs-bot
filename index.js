@@ -7,19 +7,36 @@ import cp from 'child_process';
 import syntaxerror from 'syntax-error';
 import speed from 'performance-now';
 import chalk from 'chalk';
-import { fileURLToPath } from 'url';
-import { createRequire } from 'module'
-import path, { dirname } from 'path'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
-const require = createRequire(__dirname)
-
-require(path.join(__dirname, './settings.js'))
 
 // Import semua fungsi yang diperlukan menjadi variabel global
 import * as cmd from './function/cmd.js';
 import * as func from './function/func.js';
+
+global.setting = {
+  botname: "VelzzyBotz"
+  owner: ["628817839722","628815739965","6281585933017"] //Ganti agar fitur owner bisa di gunakan
+  ownername: "Ronzz YT" //Nama lu
+  ownernomer: "628817839722" //Nomor lu
+  packname: "© VelzzyBotz" //Sticker packname ubah
+  author: "di buat oleh Ronzz YT" //Sticker author ubah
+  footer: "VelzzyBotz © 2023" //Footer ubah
+
+  prefa: ["","."]
+  mess: {
+	sukses: "Done🤗",
+	admin: "Command ini hanya bisa digunakan oleh Admin Grup",
+	botAdmin: "Bot Harus menjadi admin",
+	owner: "Command ini hanya dapat digunakan oleh owner bot",
+	prem: "Command ini khusus member premium",
+	group: "Command ini hanya bisa digunakan di grup",
+	private: "Command ini hanya bisa digunakan di Private Chat",
+	wait: "⏳ Mohon tunggu sebentar...",
+	error: {
+	    lv: "Link yang kamu berikan tidak valid",
+	    api: "Maaf terjadi kesalahan"
+	}
+  }
+}
 
 // Inisialisasi client WhatsApp
 const { Client, LocalAuth, MessageMedia } = wweb;
@@ -112,10 +129,10 @@ ronzz.on("message_create", async (m) => {
         this.body = body;
         this.args = body.trim().split(/\s+/).slice(1);
         this.value = this.args.join(" ");
-        this.prefix = /^[./!#%^&=\,;:()]/.test(body) ? body[0] : "#";
+        this.prefix = /^[./!#%^&=\,;:()]/.test(body) ? body.match(/^[./!#%^&=\,;:()]/gi)[0] : "#";
         this.command = body?.toLowerCase().split(/\s+/)[0] || "";
         this.isCmd = body?.startsWith(this.prefix) || false;
-        this.isOwner = [...global.owner].map(v => v.replace(/[^0-9]/g, '') + '@c.us').includes(id.participant || from)
+        this.isOwner = [...setting.owner].map(v => v.replace(/[^0-9]/g, '') + '@c.us').includes(id.participant || from)
         this.quotedMessage = m.getQuotedMessage() || m      
       }
 
@@ -132,22 +149,22 @@ ronzz.on("message_create", async (m) => {
     if (msg.isCmd) console.log('Pesan: ' + msg.body);
 
     const commands = {
-      menu: () => cmd.menuCommand(m, func),
+      menu: () => cmd.menuCommand(m, msg.prefix, setting, func),
       runtime: () => cmd.runtimeCommand(m, func),
       tes: () => cmd.runtimeCommand(m, func),
       ping: () => cmd.pingCommand(m, speed),
       restart: () => cmd.restartCommand(m, cp),
-      sticker: () => cmd.stickerCommand(m, msg.value, msg.quotedMessage, msg.command, MessageMedia),
-      stiker: () => cmd.stickerCommand(m, msg.value, msg.quotedMessage, msg.command, MessageMedia),
-      s: () => cmd.stickerCommand(m, msg.value, msg.quotedMessage, msg.command, MessageMedia),
-      ytmp4: () => cmd.ytMp4Command(m, msg.value, msg.command, func, MessageMedia),
-      ytmp3: () => cmd.ytMp3Command(m, msg.value, msg.command, func, MessageMedia),
-      tt: () => cmd.tiktokMp4Command(m, msg.value, msg.command, func, MessageMedia),
-      ttmp4: () => cmd.tiktokMp4Command(m, msg.value, msg.command, func, MessageMedia),
-      tiktok: () => cmd.tiktokMp4Command(m, msg.value, msg.command, func, MessageMedia),
-      tiktokmp4: () => cmd.tiktokMp4Command(m, msg.value, msg.command, func, MessageMedia),
-      ttmp3: () => cmd.tiktokMp3Command(m, msg.value, msg.command, func, MessageMedia),
-      tiktokmp3: () => cmd.tiktokMp3Command(m, msg.value, msg.command, func, MessageMedia)
+      sticker: () => cmd.stickerCommand(m, msg.value, msg.quotedMessage, msg.command, setting, MessageMedia),
+      stiker: () => cmd.stickerCommand(m, msg.value, msg.quotedMessage, msg.command, setting, MessageMedia),
+      s: () => cmd.stickerCommand(m, msg.value, msg.quotedMessage, msg.command, setting, MessageMedia),
+      ytmp4: () => cmd.ytMp4Command(m, msg.value, msg.command, setting, func, MessageMedia),
+      ytmp3: () => cmd.ytMp3Command(m, msg.value, msg.command, setting, func, MessageMedia),
+      tt: () => cmd.tiktokMp4Command(m, msg.value, msg.command, setting, func, MessageMedia),
+      ttmp4: () => cmd.tiktokMp4Command(m, msg.value, msg.command, setting, func, MessageMedia),
+      tiktok: () => cmd.tiktokMp4Command(m, msg.value, msg.command, setting, func, MessageMedia),
+      tiktokmp4: () => cmd.tiktokMp4Command(m, msg.value, msg.command, setting, func, MessageMedia),
+      ttmp3: () => cmd.tiktokMp3Command(m, msg.value, msg.command, setting, func, MessageMedia),
+      tiktokmp3: () => cmd.tiktokMp3Command(m, msg.value, msg.command, setting, func, MessageMedia)
     };
 
     if (commands[msg.command.replace(msg.prefix, '')]) {
