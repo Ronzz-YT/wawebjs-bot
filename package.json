@@ -1,0 +1,26 @@
+{
+  "name": "base-wawebjs-bot",
+  "version": "1.0.0",
+  "description": "Is simple whatsapp bots use library whatsapp-web.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "Ronzz YT",
+  "license": "ISC",
+  "dependencies": {
+    "@xct007/frieren-scraper": "^0.0.2",
+    "axios": "^1.3.6",
+    "child_process": "^1.0.2",
+    "file-type": "^18.3.0",
+    "fs": "^0.0.1-security",
+    "human-readable": "^0.2.1",
+    "millify": "^5.0.1",
+    "node-fetch": "^3.3.1",
+    "performance-now": "^2.1.0",
+    "qrcode-terminal": "^0.12.0",
+    "syntax-error": "^1.4.0",
+    "util": "^0.12.5",
+    "whatsapp-web.js": "github:Ronzz-YT/whatsapp-web.js",
+    "ytdl-core": "^4.11.2"
+  }
+}
