@@ -1,6 +1,6 @@
-const ytdl = require('ytdl-core');
-const axios = require('axios');
-const { millify } = require("millify")
+import ytdl from 'ytdl-core';
+import axios from 'axios';
+import { millify } from 'millify';
 
 function bytesToSize(bytes) {
     return new Promise((resolve, reject) => {

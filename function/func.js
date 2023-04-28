@@ -1,6 +1,6 @@
-const util = require('util');
-const hr = require('human-readable');
-const moment = require('moment');
+import util from 'util';
+import hr from 'human-readable';
+import moment from 'moment';
 
 function Formarter() {
   this.util = util.format
