@@ -45,9 +45,15 @@ Saya sarankan untuk menggunakan pm2
 
 # Thx To
 -Fatur
+
 -Dika Ardnt
+
 -Amirul
+
 -Ivanzz
+
 -whatsapp-web.js
+
 -Filham
+
 -DEFF-Y

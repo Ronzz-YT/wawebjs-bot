@@ -1,5 +1,3 @@
-import('./settings.js');
-
 import wweb from 'whatsapp-web.js';
 import qrcode from 'qrcode-terminal';
 import fs from 'fs';
@@ -9,6 +7,15 @@ import cp from 'child_process';
 import syntaxerror from 'syntax-error';
 import speed from 'performance-now';
 import chalk from 'chalk';
+import { fileURLToPath } from 'url';
+import { createRequire } from 'module'
+import path, { dirname } from 'path'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+const require = createRequire(__dirname)
+
+require(path.join(__dirname, './settings.js'))
 
 // Import semua fungsi yang diperlukan menjadi variabel global
 import * as cmd from './function/cmd.js';

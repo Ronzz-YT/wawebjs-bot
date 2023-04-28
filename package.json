@@ -2,9 +2,21 @@
   "name": "base-wawebjs-bot",
   "version": "1.0.0",
   "description": "Is simple whatsapp bots use library whatsapp-web.js",
+  "type": "module",
   "scripts": {
     "start": "node index.js",
     "ronzz": "pm2 start index.js --name ronzz && pm2 save && pm2 logs"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "**/.wwebjs_auth/**",
+      "**/node_modules/**",
+      "**/function/**",
+      "package.json"
+    ]
+  },
+  "directories": {
+    "function": "function"
   },
   "author": "Ronzz YT",
   "license": "ISC",
@@ -17,6 +29,7 @@
     "fs": "^0.0.1-security",
     "human-readable": "^0.2.1",
     "millify": "^5.0.1",
+    "mime-types": "^2.1.35",
     "moment-timezone": "^0.5.34",
     "node-fetch": "^3.3.1",
     "performance-now": "^2.1.0",
