@@ -1,17 +1,18 @@
-require('./settings.js')
+import('./settings.js');
 
-const wweb = require('whatsapp-web.js');
-const qrcode = require('qrcode-terminal');
-const fs = require('fs');
-const axios = require('axios');
-const util = require('util');
-const cp = require('child_process');
-const syntaxerror = require('syntax-error');
-const speed = require('performance-now');
-const moment = require('moment');
+import wweb from 'whatsapp-web.js';
+import qrcode from 'qrcode-terminal';
+import fs from 'fs';
+import axios from 'axios';
+import util from 'util';
+import cp from 'child_process';
+import syntaxerror from 'syntax-error';
+import speed from 'performance-now';
+import chalk from 'chalk';
 
-const cmd = require('./function/cmd.js');
-const func = require('./function/func.js');
+// Import semua fungsi yang diperlukan menjadi variabel global
+import * as cmd from './function/cmd.js';
+import * as func from './function/func.js';
 
 // Inisialisasi client WhatsApp
 const { Client, LocalAuth, MessageMedia } = wweb;
@@ -72,20 +73,16 @@ ronzz.on('ready', async () => {
 
 // Listener untuk kejadian ketika ada pengguna bergabung ke grup
 ronzz.on('group_join', (anu) => {
-  if (welcome) {
-    console.log(anu);
-    let message = `*Welcome New Member*\n\n📛 : _@${anu.id.participant.split("@")[0]}_\n🔢 : _${anu.id.participant.split("@")[0]}_\n📆 : _${func.days()}, ${func.date()}_\n⏰ : _${func.time()} *WIB*_`;
-    func.sendGroupMessage(anu, message, ronzz);
-  }
+  console.log(anu);
+  let message = `*Welcome New Member*\n\n📛 : _@${anu.id.participant.split("@")[0]}_\n🔢 : _${anu.id.participant.split("@")[0]}_\n📆 : _${func.days()}, ${func.date()}_\n⏰ : _${func.time()} *WIB*_`;
+  func.sendGroupMessage(anu, message, ronzz);
 });
 
 // Listener untuk kejadian ketika ada pengguna keluar dari grup
 ronzz.on('group_leave', (anu) => {
-  if (welcome) {
-    console.log(anu);
-    let message = `*Goodbye Old Member*\n\n📛 : _@${anu.id.participant.split("@")[0]}_\n🔢 : _${anu.id.participant.split("@")[0]}_\n📆 : _${func.days()}, ${func.date()}_\n⏰ : _${func.time()} *WIB*_`;
-    func.sendGroupMessage(anu, message, ronzz);
-  }
+  console.log(anu);
+  let message = `*Goodbye Old Member*\n\n📛 : _@${anu.id.participant.split("@")[0]}_\n🔢 : _${anu.id.participant.split("@")[0]}_\n📆 : _${func.days()}, ${func.date()}_\n⏰ : _${func.time()} *WIB*_`;
+  func.sendGroupMessage(anu, message, ronzz);
 });
 
 /*
@@ -108,10 +105,10 @@ ronzz.on("message_create", async (m) => {
         this.body = body;
         this.args = body.trim().split(/\s+/).slice(1);
         this.value = this.args.join(" ");
-        this.prefix = /^[./!#%^&=\,;:()]/gi.test(body) ? body.match(/^[./!#%^&=\,;:()]/gi)[0] : "#";
+        this.prefix = /^[./!#%^&=\,;:()]/.test(body) ? body[0] : "#";
         this.command = body?.toLowerCase().split(/\s+/)[0] || "";
         this.isCmd = body?.startsWith(this.prefix) || false;
-        this.isOwner = id.participant || from === [...global.own].map(v => v.replace(/[^0-9]/g, '') + '@c.us')
+        this.isOwner = [...global.owner].map(v => v.replace(/[^0-9]/g, '') + '@c.us').includes(id.participant || from)
         this.quotedMessage = m.getQuotedMessage() || m      
       }
 
@@ -128,22 +125,22 @@ ronzz.on("message_create", async (m) => {
     if (msg.isCmd) console.log('Pesan: ' + msg.body);
 
     const commands = {
-      menu: () => cmd.menuCommand(m, msg.prefix, func),
+      menu: () => cmd.menuCommand(m, func),
       runtime: () => cmd.runtimeCommand(m, func),
       tes: () => cmd.runtimeCommand(m, func),
       ping: () => cmd.pingCommand(m, speed),
       restart: () => cmd.restartCommand(m, cp),
-      sticker: () => cmd.stickerCommand(m, msg.value, msg.quotedMessage, msg.prefix, msg.command, MessageMedia),
-      stiker: () => cmd.stickerCommand(m, msg.value, msg.quotedMessage, msg.prefix, msg.command, MessageMedia),
-      s: () => cmd.stickerCommand(m, msg.value, msg.quotedMessage, msg.prefix, msg.command, MessageMedia),
-      ytmp4: () => cmd.ytMp4Command(m, msg.value, msg.prefix, msg.command, func, MessageMedia),
-      ytmp3: () => cmd.ytMp3Command(m, msg.value, msg.prefix, msg.command, func, MessageMedia),
-      tt: () => cmd.tiktokMp4Command(m, msg.value, msg.prefix, msg.command, func, MessageMedia),
-      ttmp4: () => cmd.tiktokMp4Command(m, msg.value, msg.prefix, msg.command, func, MessageMedia),
-      tiktok: () => cmd.tiktokMp4Command(m, msg.value, msg.prefix, msg.command, func, MessageMedia),
-      tiktokmp4: () => cmd.tiktokMp4Command(m, msg.value, msg.prefix, msg.command, func, MessageMedia),
-      ttmp3: () => cmd.tiktokMp3Command(m, msg.value, msg.prefix, msg.command, func, MessageMedia),
-      tiktokmp3: () => cmd.tiktokMp3Command(m, msg.value, msg.prefix, msg.command, func, MessageMedia)
+      sticker: () => cmd.stickerCommand(m, msg.value, msg.quotedMessage, msg.command, MessageMedia),
+      stiker: () => cmd.stickerCommand(m, msg.value, msg.quotedMessage, msg.command, MessageMedia),
+      s: () => cmd.stickerCommand(m, msg.value, msg.quotedMessage, msg.command, MessageMedia),
+      ytmp4: () => cmd.ytMp4Command(m, msg.value, msg.command, func, MessageMedia),
+      ytmp3: () => cmd.ytMp3Command(m, msg.value, msg.command, func, MessageMedia),
+      tt: () => cmd.tiktokMp4Command(m, msg.value, msg.command, func, MessageMedia),
+      ttmp4: () => cmd.tiktokMp4Command(m, msg.value, msg.command, func, MessageMedia),
+      tiktok: () => cmd.tiktokMp4Command(m, msg.value, msg.command, func, MessageMedia),
+      tiktokmp4: () => cmd.tiktokMp4Command(m, msg.value, msg.command, func, MessageMedia),
+      ttmp3: () => cmd.tiktokMp3Command(m, msg.value, msg.command, func, MessageMedia),
+      tiktokmp3: () => cmd.tiktokMp3Command(m, msg.value, msg.command, func, MessageMedia)
     };
 
     if (commands[msg.command.replace(msg.prefix, '')]) {
@@ -192,3 +189,11 @@ ronzz.on("message_create", async (m) => {
     console.log(e);
   }
 });
+
+let file = require.resolve(__filename)
+fs.watchFile(file, () => {
+	fs.unwatchFile(file)
+	console.log(chalk.redBright(`Update '${__filename}'`))
+	delete require.cache[file]
+	require(file)
+})

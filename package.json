@@ -3,18 +3,21 @@
   "version": "1.0.0",
   "description": "Is simple whatsapp bots use library whatsapp-web.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "ronzz": "pm2 start index.js --name ronzz && pm2 save && pm2 logs"
   },
   "author": "Ronzz YT",
   "license": "ISC",
   "dependencies": {
     "@xct007/frieren-scraper": "^0.0.2",
     "axios": "^1.3.6",
+    "chalk": "^4.1.2",
     "child_process": "^1.0.2",
     "file-type": "^18.3.0",
     "fs": "^0.0.1-security",
     "human-readable": "^0.2.1",
     "millify": "^5.0.1",
+    "moment-timezone": "^0.5.34",
     "node-fetch": "^3.3.1",
     "performance-now": "^2.1.0",
     "qrcode-terminal": "^0.12.0",
