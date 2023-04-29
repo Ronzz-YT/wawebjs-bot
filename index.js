@@ -6,45 +6,42 @@ import util from 'util';
 import cp from 'child_process';
 import syntaxerror from 'syntax-error';
 import speed from 'performance-now';
-import chalk from 'chalk';
+import * as load from './function/loaderDatabase.js';
 
 // Import semua fungsi yang diperlukan menjadi variabel global
-import * as cmd from './function/cmd.js';
-import * as func from './function/func.js';
+import CMD from './function/cmd.js'
+const cmd = new CMD();
+import * as func from './function/func.js'
+import { databased, dbsaver, connect } from './function/database.js';
 
 global.setting = {
-  botname: "VelzzyBotz"
-  owner: ["628817839722","628815739965","6281585933017"] //Ganti agar fitur owner bisa di gunakan
-  ownername: "Ronzz YT" //Nama lu
-  ownernomer: "628817839722" //Nomor lu
-  packname: "© VelzzyBotz" //Sticker packname ubah
-  author: "di buat oleh Ronzz YT" //Sticker author ubah
-  footer: "VelzzyBotz © 2023" //Footer ubah
+  botname: 'VelzzyBotz',
+  owner: ['628817839722', '628815739965', '6281585933017'],
+  ownername: 'Ronzz YT',
+  ownernomer: '628817839722',
+  packname: '© VelzzyBotz',
+  author: 'dibuat oleh Ronzz YT'
+}
 
-  prefa: ["","."]
-  mess: {
-	sukses: "Done🤗",
-	admin: "Command ini hanya bisa digunakan oleh Admin Grup",
-	botAdmin: "Bot Harus menjadi admin",
-	owner: "Command ini hanya dapat digunakan oleh owner bot",
-	prem: "Command ini khusus member premium",
-	group: "Command ini hanya bisa digunakan di grup",
-	private: "Command ini hanya bisa digunakan di Private Chat",
-	wait: "⏳ Mohon tunggu sebentar...",
-	error: {
-	    lv: "Link yang kamu berikan tidak valid",
-	    api: "Maaf terjadi kesalahan"
-	}
+global.mess = {
+  sukses: "Done🤗",
+  admin: "Command ini hanya bisa digunakan oleh Admin Grup",
+  botAdmin: "Bot Harus menjadi admin",
+  owner: "Command ini hanya dapat digunakan oleh owner bot",
+  prem: "Command ini khusus member premium",
+  group: "Command ini hanya bisa digunakan di grup",
+  private: "Command ini hanya bisa digunakan di Private Chat",
+  wait: "⏳ Mohon tunggu sebentar...",
+  error: {
+	lv: "Link yang kamu berikan tidak valid",
+	api: "Maaf terjadi kesalahan"
   }
 }
 
 // Inisialisasi client WhatsApp
 const { Client, LocalAuth, MessageMedia } = wweb;
-const ronzz = new Client({
+const deff = new Client({
   authStrategy: new LocalAuth(),
-  qrMaxRetries: 3,
-  takeoverOnConflict: true,
-  takeoverTimeoutMs: 3000,
   bypassCSP: true,
   puppeteer: {
     args: [
@@ -66,53 +63,57 @@ const ronzz = new Client({
 });
 
 // Mulai menjalankan client WhatsApp
-ronzz.initialize();
-
+deff.initialize();
+connect().catch(() => connect())
+setInterval(async () => { fs.writeFileSync(`./storage/database/database.json`, JSON.stringify(global.db, null, 3))}, 3 * 1000)
 // Event saat loading screen muncul
-ronzz.on('loading_screen', (percent, message) => {
+deff.on('loading_screen', (percent, message) => {
   console.log('LOADING SCREEN', percent, message);
 });
 
 // Event saat QR code muncul
-ronzz.on('qr', (qr) => {
+deff.on('qr', (qr) => {
   console.log('QR RECEIVED', qr);
   qrcode.generate(qr, { small: true });
 });
 
 // Event saat proses authentikasi berhasil
-ronzz.on('authenticated', () => {
+deff.on('authenticated', () => {
   console.log('AUTHENTICATED');
 });
 
 // Event saat proses authentikasi gagal
-ronzz.on('auth_failure', (msg) => {
+deff.on('auth_failure', (msg) => {
   console.error('AUTHENTICATION FAILURE', msg);
 });
 
 // Event saat client WhatsApp siap digunakan
-ronzz.on('ready', async () => {
+deff.on('ready', async () => {
   console.log('READY');
-  
 });
 
 // Listener untuk kejadian ketika ada pengguna bergabung ke grup
-ronzz.on('group_join', (anu) => {
-  console.log(anu);
-  let message = `*Welcome New Member*\n\n📛 : _@${anu.id.participant.split("@")[0]}_\n🔢 : _${anu.id.participant.split("@")[0]}_\n📆 : _${func.days()}, ${func.date()}_\n⏰ : _${func.time()} *WIB*_`;
-  func.sendGroupMessage(anu, message, ronzz);
+deff.on('group_join', (anu) => {
+  if (db.groups[anu.id].welcome === true) {
+    console.log(anu);
+    const message = 'Selamat datang';
+    func.sendGroupMessage(anu, message, deff);
+  }
 });
 
 // Listener untuk kejadian ketika ada pengguna keluar dari grup
-ronzz.on('group_leave', (anu) => {
-  console.log(anu);
-  let message = `*Goodbye Old Member*\n\n📛 : _@${anu.id.participant.split("@")[0]}_\n🔢 : _${anu.id.participant.split("@")[0]}_\n📆 : _${func.days()}, ${func.date()}_\n⏰ : _${func.time()} *WIB*_`;
-  func.sendGroupMessage(anu, message, ronzz);
+deff.on('group_leave', (anu) => {
+  if (db.groups[anu.id].welcome === true) {
+    console.log(anu);
+    const message = 'Selamat tinggal';
+    func.sendGroupMessage(anu, message, deff);
+  }
 });
 
 /*
  @Feature in here
 */
-ronzz.on("message_create", async (m) => {
+deff.on("message_create", async (m) => {
   try {
     if (!m._data.isNewMsg) return;
 
@@ -129,11 +130,13 @@ ronzz.on("message_create", async (m) => {
         this.body = body;
         this.args = body.trim().split(/\s+/).slice(1);
         this.value = this.args.join(" ");
-        this.prefix = /^[./!#%^&=\,;:()]/.test(body) ? body.match(/^[./!#%^&=\,;:()]/gi)[0] : "#";
+        this.prefix = /^[./!#%^&=\,;:()]/.test(body) ? body[0] : "#";
         this.command = body?.toLowerCase().split(/\s+/)[0] || "";
         this.isCmd = body?.startsWith(this.prefix) || false;
         this.isOwner = [...setting.owner].map(v => v.replace(/[^0-9]/g, '') + '@c.us').includes(id.participant || from)
-        this.quotedMessage = m.getQuotedMessage() || m      
+        this.quotedMessage = m.getQuotedMessage() || m;
+        this.isGroup = m.id.remote.endsWith('g.us');
+        this.isPrivate = m.id.remote.endsWith('c.us');
       }
 
       async getChat() {
@@ -144,80 +147,121 @@ ronzz.on("message_create", async (m) => {
       }
     }
 
-    const msg = new Message({ ...m });
+  const msg = new Message({ ...m });
+  const participantsGroup = await m.getChat().then(chat => chat.participants);
+  const adminFilter = msg.isGroup ? participantsGroup.filter(v => v.isAdmin).map(v => v.id.user) : null;
+  msg.isAdmin = adminFilter ? adminFilter.map(v => v.replace(/[^0-9]/g, '') + '@c.us').includes(m.author ? m.author : m.from) : false;
+  msg.isBotAdmin = adminFilter ? adminFilter.map(v => v.replace(/[^0-9]/g, '') + '@c.us').includes(deff.info.me._serialized) : false;
 
-    if (msg.isCmd) console.log('Pesan: ' + msg.body);
-
-    const commands = {
-      menu: () => cmd.menuCommand(m, msg.prefix, setting, func),
-      runtime: () => cmd.runtimeCommand(m, func),
-      tes: () => cmd.runtimeCommand(m, func),
-      ping: () => cmd.pingCommand(m, speed),
-      restart: () => cmd.restartCommand(m, cp),
-      sticker: () => cmd.stickerCommand(m, msg.value, msg.quotedMessage, msg.command, setting, MessageMedia),
-      stiker: () => cmd.stickerCommand(m, msg.value, msg.quotedMessage, msg.command, setting, MessageMedia),
-      s: () => cmd.stickerCommand(m, msg.value, msg.quotedMessage, msg.command, setting, MessageMedia),
-      ytmp4: () => cmd.ytMp4Command(m, msg.value, msg.command, setting, func, MessageMedia),
-      ytmp3: () => cmd.ytMp3Command(m, msg.value, msg.command, setting, func, MessageMedia),
-      tt: () => cmd.tiktokMp4Command(m, msg.value, msg.command, setting, func, MessageMedia),
-      ttmp4: () => cmd.tiktokMp4Command(m, msg.value, msg.command, setting, func, MessageMedia),
-      tiktok: () => cmd.tiktokMp4Command(m, msg.value, msg.command, setting, func, MessageMedia),
-      tiktokmp4: () => cmd.tiktokMp4Command(m, msg.value, msg.command, setting, func, MessageMedia),
-      ttmp3: () => cmd.tiktokMp3Command(m, msg.value, msg.command, setting, func, MessageMedia),
-      tiktokmp3: () => cmd.tiktokMp3Command(m, msg.value, msg.command, setting, func, MessageMedia)
-    };
-
-    if (commands[msg.command.replace(msg.prefix, '')]) {
-      commands[msg.command.replace(msg.prefix, '')]();
-    } else {
-     // console.log('Text no command');
-    }
-
-    // Check command type
-    switch (msg.command) {
-      case '>':
-      case '=>': {
-        // Evaluate argument
-        if (!msg.isOwner) return;
-        try {
-          const result = await eval(`(async () => { return ${msg.value} })()`);
-          console.log(result);
-          m.reply(util.format(result));
-        } catch (e) {
-          const err = syntaxerror(msg.value, "EvalError", {
-            allowReturnOutsideFunction: true,
-            allowAwaitOutsideFunction: true,
-            sourceType: "module"
-          });
-          let erTxt = `${err ? `${err}\n\n` : ""}${util.format(e)}`;
-          m.reply(erTxt);
-        }
-        break;
-      }
-
-      case '$': {
-        // Execute shell command
-        if (!msg.isOwner) return;
-        try {
-          cp.exec(msg.args.join(" "), function (err, stdout) {
-            if (err) m.reply(util.format(err.toString().replace(/\x1b\[[0-9;]*m/g, "")));
-            if (stdout) m.reply(util.format(stdout.toString().replace(/\x1b\[[0-9;]*m/g, "")));
-          });
-        } catch (e) {
-          console.warn(e);
-        }
-        break;
+  
+  if (msg.isCmd) { console.log('Pesan: ' + msg.body) }
+    if (msg.body) { await load.loadDatabase(m, msg) }
+    if (db.setting.self === true) {
+    	if (msg.isCmd && !msg.isOwner) { return
       }
     }
+const commands = {
+  menu: (message) => ({
+    execute: () => cmd.menuCommand(m, setting, msg.prefix, func),
+    matches: ['menu', 'help']
+  }),
+  runtime: (message) => ({
+    execute: () => cmd.runtimeCommand(m, func),
+    matches: ['runtime', 'uptime', 'tes']
+  }),
+  ping: (message) => ({
+    execute: () => cmd.pingCommand(m, speed),
+    matches: ['ping', 'speed']
+  }),
+  restart: (message) => ({
+    execute: () => cmd.restartCommand(m, cp),
+    matches: ['restart']
+  }),
+  sticker: (message) => ({
+    execute: () => cmd.stickerCommand(m, msg, setting, MessageMedia),
+    matches: ['sticker', 's', 'stiker', 'sgif', 'stickergif', 'stikergif']
+  }),
+  ytmp4: (message) => ({
+    execute: () => cmd.ytMp4Command(m, msg, func, MessageMedia),
+    matches: ['ytmp4', 'ytvideo', 'ytdl', 'ytdlmp4']
+  }),
+  ytmp3: (message) => ({
+    execute: () => cmd.ytMp3Command(m, msg, func, MessageMedia),
+    matches: ['ytmp3', 'ytaudio', 'ytdlmp3']
+  tiktokmp4: (message) => ({
+    execute: () => cmd.tiktokMp4Command(m, msg, func, MessageMedia),
+    matches: ['tiktok', 'tiktokvideo', 'ttvideo', 'tiktokmp4', 'ttdl', 'ttdlm4', 'ttmp4', 'tt']
+  }),
+  tiktokmp3: (message) => ({
+    execute: () => cmd.tiktokMp4Command(m, msg, func, MessageMedia),
+    matches: ['tiktokmp3', 'tiktokaudio', 'ttaudio', 'ttdlm3', 'ttmp3']
+  }),
+  screenshotWa: (message) => ({
+  	execute: () => cmd.screenshotWaCommand(m, deff, msg, MessageMedia),
+      matches: ['sswa', 'screenshot-whatsapp']
+  	}),
+  activator: (message) => ({
+  	execute: () => cmd.activatorGroupCommand(m, msg),
+      matches: ['enable', 'disable']
+  	})
+};
+
+
+function findCommand(message) {
+  const command = message.command.slice(1);
+  for (const cmd of Object.keys(commands)) {
+    const { matches, execute } = commands[cmd](message);
+    if (matches.includes(command)) {
+      execute();
+      return;
+    }
+  }
+  // console.log('Text no command');
+}
+
+if (msg) {
+  findCommand(msg);
+}
+
+//No prefix command
+ let commandTypes = {
+  '>': async (msg, m) => {
+    // Evaluate argument
+    if (!msg.isOwner) return;
+    try {
+      const result = await eval(`(async () => { return ${msg.value} })()`);
+      console.log(result);
+      m.reply(util.format(result));
+    } catch (e) {
+      const err = syntaxerror(msg.value, "EvalError", {
+        allowReturnOutsideFunction: true,
+        allowAwaitOutsideFunction: true,
+        sourceType: "module"
+      });
+      let erTxt = `${err ? `${err}\n\n` : ""}${util.format(e)}`
+      m.reply(erTxt);
+    }
+  },
+  '$': (msg, m) => {
+    // Execute shell command
+    if (!msg.isOwner) return;
+    try {
+      cp.exec(msg.args.join(" "), function (err, stdout) {
+        if (err) m.reply(util.format(err.toString().replace(/\x1b\[[0-9;]*m/g, "")));
+        if (stdout) m.reply(util.format(stdout.toString().replace(/\x1b\[[0-9;]*m/g, "")));
+      });
+    } catch (e) {
+      console.warn(e);
+    }
+  }
+}
+const messageType = msg.command;
+const commandHandler = commandTypes[messageType];
+if (commandHandler) {
+  commandHandler(msg, m);
+}
+
   } catch (e) {
-    console.log(e);
+    console.warn(e);
   }
 });
-
-let file = require.resolve(__filename)
-fs.watchFile(file, () => {
-	fs.unwatchFile(file)
-	console.log(chalk.redBright(`Update '${__filename}'`))
-	delete require.cache[file]
-	require(file)
-})

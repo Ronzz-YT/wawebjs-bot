@@ -1,59 +1,92 @@
 
-# wawebjs-bot
-Nodejs Esm bot whatsapp dengan lib whatsapp-web.js
 
-# Install
-Perlu diketahui script ini tidak di peruntukan untuk android/termux
+# WhatsApp-Web.js Bot
 
-Disarankan menggunakan Ubuntu (vps)/Windows(Rdp) atau panel² yg support terhadap puppeter
+![Node.js](https://img.shields.io/badge/Node.js-v18.16.0-green)
 
-# Ubuntu Install
-apt update && apt upgrade
+![whatsapp-web.js](https://img.shields.io/badge/whatsapp--web.js-v1.19.5-blue)
+
+![License](https://img.shields.io/badge/license-MIT-yellow)
+
+This is a Node.js ESM-based WhatsApp bot using the `whatsapp-web.js` library.
+
+## Disclamer
+Jangan menjual script ini, lebih baik saling memberi saja kepada org lain
+
+Mengubah struktur script ini dan menjual kepada org apalagi mengclaim script ini milik anda tidak akan membuat anda hebat
+
+## Table of Contents
+
+- [Information](#information)
+
+- [Installation](#installation)
+
+- [Contributing](#contributing)
+
+## Information
+
+Please note that this script is not intended for use on Android/Termux. It is recommended to use Ubuntu (VPS)/Windows(RDP) or panels that support Puppeter.
+
+## Installation
+
+### Ubuntu
+
+```
+# Update and upgrade system packages
+
+sudo apt update && sudo apt upgrade
+
+# Install Node.js
 
 sudo apt install nodejs
 
-sudo apt install 
+# Install Google Chrome Stable version
 
 wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 
 sudo dpkg -i google-chrome-stable_current_amd64.deb
 
-cd /whatsapp-web.js-bot
+# Clone the repository
 
-npm i
+git clone https://github.com/your-username/whatsapp-web.js-bot.git
 
-npm i pm2 -g
+# Navigate to the cloned directory
 
-# Run
-Jika kalian menggunakan pm2
+cd whatsapp-web.js-bot
 
-- npm i pm2 -g
-- pm2 start index.js --name bot
-- pm2 log
+# Install dependencies
 
-Jika kalian menggunakan node/npm
+npm install
 
-- node index.js
-- npm start
+# Install pm2 globally
 
-Jika kalian menggunakan nodemon
+npm install pm2 -g
 
-- npm i nodemon -g
-- nodemon index.js
+# Start the bot with pm2
 
-Saya sarankan untuk menggunakan pm2
+pm2 start index.js --name bot
 
-# Thx To
--Fatur
+# View logs
 
--Dika Ardnt
+pm2 log
+```
 
--Amirul
+## contributing
 
--Ivanzz
+### Special thanks to:
 
--whatsapp-web.js
+Fatur
 
--Filham
+Dika Ardnt
 
--DEFF-Y
+Amirul
+
+Ivanzz
+
+Filham
+
+whatsapp-web.js
+
+DEFF-Y
+
+If you would like to contribute to this project, feel free to fork the repository and submit a pull request.
